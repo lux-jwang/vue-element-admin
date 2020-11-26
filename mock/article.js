@@ -27,12 +27,17 @@ for (let i = 0; i < count; i++) {
   }))
 }
 
+const allindex = Mock.mock({
+  timeid: '@increment',
+  aiindex: '@float(80, 100, 2, 2)'
+})
+
 module.exports = [
   {
     url: '/vue-element-admin/article/list',
     type: 'get',
     response: config => {
-      const { importance, type, title, page = 1, limit = 20, sort } = config.query
+      const { importance, type, title, page = 1, limit = 18, sort } = config.query
 
       let mockList = List.filter(item => {
         if (importance && item.importance !== +importance) return false
@@ -103,12 +108,52 @@ module.exports = [
   },
 
   {
+    url: '/vue-element-admin/article/[A-Za-z0-9]/comments',
+    type: 'get',
+    response: (req, res) => {
+      return {
+        code: 20000,
+        data: "success"
+      }
+    }
+  },
+
+  {
     url: '/vue-element-admin/article/update',
     type: 'post',
     response: _ => {
       return {
         code: 20000,
         data: 'success'
+      }
+    }
+  },
+
+  {
+    url: '/vue-element-admin/article/aiindex',
+    type: 'get',
+    response: (req, res) => {
+      return {
+        code: 20000,
+        data:{
+          aiindex: Math.floor(Math.random() * 10) + 91, //AI index
+          alarms_smoke: Math.floor(Math.random() * 7), //alarm index for each type of sensors
+          alarms_temp: Math.floor(Math.random() * 10),
+          alarms_lift: Math.floor(Math.random() * 6),
+          alarms_humidity: Math.floor(Math.random() * 4),
+          alarms_gas: Math.floor(Math.random() * 4)
+        }
+      }
+    }
+  },
+
+  {
+    url: '/vue-element-admin/article/aiconfig',
+    type: 'get',
+    response: (req, res) => {
+      return {
+        code: 20000,
+        data: "do something"
       }
     }
   }

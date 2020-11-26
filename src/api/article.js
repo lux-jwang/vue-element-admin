@@ -39,3 +39,30 @@ export function updateArticle(data) {
     data
   })
 }
+
+export function fetchComments(id) {
+  return request({
+    url:'/vue-element-admin/article/${id}/comments',
+    method: 'get'
+  })
+
+}
+
+
+export function fetchAIindex() {
+  return request({
+    url:'/vue-element-admin/article/aiindex',
+    method: 'get'
+  })
+
+}
+
+//send configuration to the server
+//
+export function updateAIConfig(config_data) {
+  return request({
+    url:'/vue-element-admin/article/aiconfig',
+    method: 'get',
+    params: {config_data}
+  })
+}
