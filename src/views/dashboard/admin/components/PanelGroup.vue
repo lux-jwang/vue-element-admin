@@ -1,73 +1,213 @@
-<template>
-  <el-row :gutter="40" class="panel-group">
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
-        <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+<template> 
+    <div class="app-container">
+        <div class="filter-container">
+            <el-select placeholder="Sensor Type" v-model="type_selected" @change="handleType('type',type_selected)">
+                <el-option v-for="option in type_options" v-bind:value="option.value">
+                    {{ option.label}}
+                </el-option>
+            </el-select>
+            <el-select placeholder="Sensor Num" v-model="num_selected" @change="handleType('num',num_selected)">
+                <el-option v-for="option in num_options" v-bind:value="option.value">
+                    {{ option.label }}
+                </el-option>
+            </el-select>
+            <el-select placeholder="Sensor Severity" v-model="severity_selected" @change="handleType('severity',severity_selected)">
+                <el-option v-for="option in severity_options" v-bind:value="option.value">
+                    {{ option.label }}
+                </el-option>
+            </el-select>
+            <el-select placeholder="Failure %" v-model="failure_selected" @change="handleType('failure',failure_selected)">
+                <el-option v-for="option in failure_options" v-bind:value="option.value">
+                    {{ option.label }}
+                </el-option>
+            </el-select>
+            <el-select placeholder="Refresh" v-model="refresh_selected" @change="handleType('refresh',refresh_selected)">
+                <el-option v-for="option in refresh_options" v-bind:value="option.value">
+                    {{ option.label }}
+                </el-option>
+            </el-select>
+            <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleConfigData">
+                Add
+            </el-button>
         </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            New Visits
-          </div>
-          <count-to :start-val="0" :end-val="102400" :duration="2600" class="card-panel-num" />
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('messages')">
-        <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="message" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            Messages
-          </div>
-          <count-to :start-val="0" :end-val="81212" :duration="3000" class="card-panel-num" />
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('purchases')">
-        <div class="card-panel-icon-wrapper icon-money">
-          <svg-icon icon-class="money" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            Purchases
-          </div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" />
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('shoppings')">
-        <div class="card-panel-icon-wrapper icon-shopping">
-          <svg-icon icon-class="shopping" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            Shoppings
-          </div>
-          <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num" />
-        </div>
-      </div>
-    </el-col>
-  </el-row>
+        <div>
+            <el-table :data="config_list" style="width: 80%;padding-top: 15px;">
+                <el-table-column label="Sensor Type" prop="type" min-width="200">
+                </el-table-column>
+                <el-table-column label="Sensor Num" prop="num" width="200" align="center">
+                </el-table-column>
+                <el-table-column label="Sensor Severity" prop="severity" width="200" align="center">
+                </el-table-column>
+                <el-table-column label="Failure %" prop="failure" width="200" align="center">
+                </el-table-column>
+            </el-table>
+  </div>
+    </div>
 </template>
 
 <script>
 import CountTo from 'vue-count-to'
 
+//send config_data to the server
+import { updateAIConfig } from '@/api/article' 
 export default {
+
+  name: "PanelGroup",
+
   components: {
     CountTo
   },
+
   methods: {
     handleSetLineChartData(type) {
+      console.log(type)
       this.$emit('handleSetLineChartData', type)
+    },
+
+    handleType(key, val) {
+      this.config_data[key]=val
+    },
+
+    fetchConfigData(config_data){
+      if(config_data.refresh>0){
+        this.config_list = []
+      }
+      this.config_list.push({
+        type: config_data.type,
+        num: config_data.num,
+        severity: config_data.severity,
+        failure: config_data.failure
+      })
+
+    },
+
+    handleConfigData(){
+       this.fetchConfigData(this.config_data)
+       updateAIConfig(this.config_data).then(response => {
+        console.log(response.data)
+      })
+    }
+  },
+
+  data() {
+    return {
+      config_list: [],
+      config_data: {
+       type: 1,
+       num:200,
+       severity:5,
+       failure:0.1,
+       refresh:0
+      },
+      aiindex: [],
+      severity_selected: undefined,
+      severity_options: [{
+        value: '9',
+        label: 'severity 9'
+      }, {
+        value: '8',
+        label: 'severity 8'
+      }, {
+        value: '7',
+        label: 'severity 7'
+      }, {
+        value: '6',
+        label: 'severity 6'
+      }, {
+        value: '5',
+        label: 'severity 5'
+      }, {
+        value: '4',
+        label: 'severity 4'
+      }, {
+        value: '3',
+        label: 'severity 3'
+      }, {
+        value: '2',
+        label: 'severity 2'
+      }, {
+        value: '1',
+        label: 'servrity 1'
+      }],
+
+      type_selected: undefined,
+      type_options: [{
+        value: '1',
+        label: 'Somke'
+      }, {
+        value: '2',
+        label: 'Temperature'
+      }, {
+        value: '3',
+        label: 'Humidity'
+      }, {
+        value: '4',
+        label: 'Lift'
+      }, {
+        value: '5',
+        label: 'Gas'
+      }],
+
+      num_selected: undefined,
+      num_options: [{
+        value: '400',
+        label: 'num 400'
+      }, {
+        value: '1',
+        label: 'num 1'
+      }, {
+        value: '10',
+        label: 'num 10'
+      }, {
+        value: '50',
+        label: 'num 50'
+      }, {
+        value: '100',
+        label: 'num 100'
+      }, {
+        value: '200',
+        label: 'num 200'
+      }, {
+        value: '1000',
+        label: 'num 1000'
+      }, {
+        value: '2000',
+        label: 'num 2000'
+      }, {
+        value: '5000',
+        label: 'num 5000'
+      }],
+
+      failure_selected: undefined,
+      failure_options: [{
+        value: '0.01',
+        label: 'failure 1%'
+      }, {
+        value: '0.05',
+        label: 'failure 5%'
+      }, {
+        value: '0.1',
+        label: 'failure 10%'
+      }, {
+        value: '0.15',
+        label: 'failure 15%'
+      }, {
+        value: '0.2',
+        label: 'failure 20%'
+      }],
+
+      refresh_selected: undefined,
+      refresh_options: [{
+        value: '0',
+        label: 'refresh False'
+      }, {
+        value: '1',
+        label: 'refresh True'
+      }],
     }
   }
 }
+
 </script>
 
 <style lang="scss" scoped>
